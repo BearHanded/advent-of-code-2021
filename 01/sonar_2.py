@@ -12,6 +12,6 @@ for i in range(3, len(sonar_list)):
     sum_b = sonar_list[idx_b-2] + sonar_list[idx_b-1] + sonar_list[idx_b]
 
     if sum_b > sum_a:
-        total_increases += 1;
+        total_increases += 1
 
-print("Increases: ", total_increases);
+print("Increases: ", total_increases)
