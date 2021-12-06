@@ -36,7 +36,7 @@ class VentMap:
             if x_diff == 0 or y_diff == 0:  # part 1 limit
                 for x in range(pair[0][0], pair[1][0] + x_mod, x_mod):
                     for y in range(pair[0][1], pair[1][1] + y_mod, y_mod):
-                        self.add_vent(x,y)
+                        self.add_vent(x, y)
             elif DIAGONAL_ALLOWED:
                 temp_x = pair[0][0]
                 temp_y = pair[0][1]
@@ -50,6 +50,7 @@ class VentMap:
             self.collision_count += 1
             self.collisions.append([x, y])
         self.vent_map[x][y] += 1
+
 
 def rows_to_coordinates(rows):
     points = [row.split(" -> ") for row in rows]
