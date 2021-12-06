@@ -23,4 +23,4 @@ def go_fish(initial_state, days):
 
 # Parse
 initial_fish = [int(x) for x in christmas_input.file_as_string(FILE).split(",")]
-smart_fish(initial_fish, TOTAL_DAYS)
+go_fish(initial_fish, TOTAL_DAYS)
