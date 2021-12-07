@@ -18,7 +18,6 @@ def go_fish(initial_state, days):
             fish_state[6] += popped
             fish_state[8] += popped
     print("Total Fish:", sum(fish_state))
-    return fish_state
 
 
 # Parse
