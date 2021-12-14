@@ -1,66 +1,77 @@
 from util import christmas_input
+import copy
 
-FILE = './test_input.txt'
-
-
-def add_queued_elements(elements, queue):
-    result = [None]*(len(elements)+len(queue))
-    result[::2] = elements
-    result[1::2] = queue
-    return result
+FILE = './input.txt'
 
 
-def polymerize(elements, rules, steps=10):
-    max_key_size = 2
+class Compound:
+    def __init__(self, name, result):
+        self.results = [name[0] + result, result + name[1]]  # forward
+        self.count = 0  # horizontal (unused)
+
+
+def populate(elements, rule_dict):
+    for idx, elem in enumerate(elements):
+        if idx + 1 >= len(elements):
+            break
+        pair = elem + elements[idx+1]
+        rule_dict[pair].count += 1
+
+
+def print_rules(rule_dict):
+    print("-------")
+    for k in rule_dict:
+        print(k, rule_dict[k].count, rule_dict[k].results)
+
+
+def polymerize(rules_dict, steps=10):
     for i in range(steps):
-        new_elements = ''
-        operable_string = ''.join(elements)
-        while len(operable_string) > 1:
-            restart = False
-            for idx in range(len(elements)):
-                end_range = min(len(elements)+1, idx + max_key_size)
-                for end_idx in reversed(range(idx + 1, end_range)):
-                    compound = operable_string[idx:end_idx + 1]
-                    if compound in rules:
-                        result = rules[compound]
-                        operable_string = operable_string[idx+1:]
-                        new_elements += result
-                        restart = True
-                        break
-                if restart is True:
-                    break
-        new_elements += operable_string # add last character back
+        print("Step", i+1)
+        updated_rules = copy.deepcopy(rules_dict)  # make sure none of the updates cascade into each other
+        for k in rules_dict:
+            # add to results for each entry
+            count = rules_dict[k].count
+            if count > 0:
+                for result in rules_dict[k].results:
+                    updated_rules[result].count += count
+                updated_rules[k].count -= count # removes itself
+        rules_dict = updated_rules
 
-        print("step:", i + 1)
-        if steps <= 10:
-            print("".join(new_elements))
-
-        # Save new rules
-        for x in range(len(elements) - 1):
-            for y in range(x+1+i, len(elements)+1):
-                rules[''.join(elements[x:y+1])] = ''.join(new_elements[2*x:2*y])
-        max_key_size = len(new_elements)
-        elements = new_elements
-
-    return elements
+    return rules_dict
 
 
-def analyze(elements):
-    res = {i: elements.count(i) for i in set(elements)}
-    v = list(res.values())
+def analyze(rules_dict, start, end):
+    char_counts = {}
+    for k in rules_dict:
+        count = rules_dict[k].count / 2
+        if k[0] in char_counts:
+            char_counts[k[0]] += count
+        else:
+            char_counts[k[0]] = count
+        if k[1] in char_counts:
+            char_counts[k[1]] += count
+        else:
+            char_counts[k[1]] = count
+    # fix ends of the string
+    char_counts[start] += 0.5
+    char_counts[end] += 0.5
+    print(char_counts)
+    # res = {i: elements.count(i) for i in set(elements)}
+    v = list(char_counts.values())
     print(max(v) - min(v))
+
 
 # Parse
 rows = christmas_input.file_to_array(FILE)
 instruction_break = rows.index('')
 template = rows[:instruction_break][0]
 print(template)
-rules = {pair[0]: pair[0][0] + pair[1] for pair in [row.split(" -> ") for row in rows[instruction_break+1:]]}
-print(rules)
+rules = {pair[0]: Compound(pair[0], pair[1]) for pair in [row.split(" -> ") for row in rows[instruction_break+1:]]}
+populate(template, rules)
 
-final_results = polymerize(template, rules)
-analyze(final_results)
+final_results = polymerize(rules)
+analyze(final_results, template[0], template[-1])
 
 print("Part 2 begin:")
-# final_results = polymerize(template, rules, steps=40)
-# analyze(final_results)
+final_results = polymerize(rules, steps=40)
+analyze(final_results, template[0], template[-1])
