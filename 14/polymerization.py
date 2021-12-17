@@ -1,13 +1,13 @@
 from util import christmas_input
 import copy
 
-FILE = './input.txt'
+FILE = './test_input.txt'
 
 
 class Compound:
     def __init__(self, name, result):
-        self.results = [name[0] + result, result + name[1]]  # forward
-        self.count = 0  # horizontal (unused)
+        self.results = [name[0] + result, result + name[1]]
+        self.count = 0
 
 
 def populate(elements, rule_dict):
