@@ -1,78 +1,56 @@
-from util import christmas_input
-import math
-
 FILE_1 = './input.txt'
 TEST_FILE = './test_input.txt'
 
 
 def calculate_max(x_points, y_points):
-    grav = -1
-    drag = -1
-    position = [0, 0]
-    max_y = 0
-
-    # to be cool, x just needs to be such that drag zeroes out velocity in range
-    angle_x = get_x(x_points)
-    angle_y = get_y(y_points)
-    print(angle_x, angle_y)
-    return
-
-
-def get_x(x_points):
-    # to be cool, x just needs to be such that drag zeroes out velocity in range
-    n = x_points[0] / 2
-    solved = False
-    bound_start = 0
-    bound_end = x_points[0]
-    while not solved:
-        final_position = (n * (n+1)/2)
-        solved = x_points[0] <= final_position <= x_points[1]
-        if not solved:
-            if final_position > x_points[1]:
-                bound_end = n
-            else:
-                bound_start = n
-            n = bound_start + (bound_end - bound_start) / 2
-    return n
-
-
-def get_y(y_points):
-    # going for max height here
-    initial_velocity = 0
-    impossible = False
-    size = abs(y_points[0] - y_points[1])
-    while not impossible:
-        in_flight = True
-        curr_velocity = initial_velocity
-        position = 0
+    total = 0
+    max_height = 0
+    for angle_x in range(0, 1000):
+        final_position = (angle_x * (angle_x + 1) / 2)
+        if final_position < x_points[0]:  # Doesn't reach target. Kill
+            continue
+        if angle_x > x_points[1]:  # too fast to hit target
+            break
         success = False
-        while in_flight:
-            position += curr_velocity
-            curr_velocity -= 1
 
-            if y_points[0] <= position <= y_points[1]:
-                success = True
-                in_flight = False
-            elif position < y_points[0]:
-                in_flight = False
+        # Simulate Y
+        for angle_y in range(-1000, 1000):
+            if angle_y < y_points[0]:  # too fast to hit target
+                continue
+            xv, yv = angle_x, angle_y
+            x, y = 0, 0
+            trip_max_height = 0
 
-        if not success and curr_velocity > size:
-            impossible = True
-        else:
-            initial_velocity += 1
-    return initial_velocity
+            for _ in range(1000):
+                x += xv
+                y += yv
+                trip_max_height = max(trip_max_height, y)
+
+                if xv > 0:
+                    xv -= 1
+                yv -= 1
+
+                if in_range((x, y), x_points, y_points):
+                    max_height = max(max_height, trip_max_height)
+                    total += 1
+                    success = True
+                    print("(", angle_x, angle_y, ")", end=" ")
+                    break
+                elif y < y_points[0]:  # Passed target. Kill
+                    break
+        if success:
+            print("")
+
+    print("Max Y:", max_height)
+    print("Total", total)
 
 
 def in_range(coordinates, x_points, y_points):
     return x_points[0] <= coordinates[0] <= x_points[1] and y_points[0] <= coordinates[1] <= y_points[1]
 
 
-def has_missed(coordinates, x_points, y_points):
-    return coordinates[0] > x_points[1] or coordinates[1] < y_points[0]
-
 # Parse
-print("Part 1: ")
-test = (20, 30), (-5, -10)          # target area: x=20..30, y=-10..-5
-part_1 = (32, 65), (-177, -225)     # target area: x=32..65, y=-225..-177
-
-highest_arc = calculate_max((20, 30), (-5, -10))
+print("TEST: ")
+calculate_max((20, 30), (-10, -5))
+print("LIVE: ")
+calculate_max((32, 65), (-225, -177))
