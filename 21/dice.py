@@ -57,35 +57,20 @@ def play_game(positions=[]):
     return part_one
 
 
-def split_universe(player, roll):
+def split_universe(player):
     out = {}
+    distributions = {3: 1, 4: 3, 5: 6, 6: 7, 7: 6, 8: 3, 9: 1}
     for state in player:
-        new_position = state[0] + roll
-        new_position %= 10
-        if new_position == 0:
-            new_position = 10
-        if (new_position, state[1]) in out:
-            out[(new_position, state[1])] += player[state]
-        else:
-            out[(new_position, state[1])] = player[state]
-    return out
-
-
-def update_scores(player):
-    out = {}
-    for state in player:
-        new_score = state[0] + state[1]
-        out[(state[0], new_score)] = player[state]
-    return out
-
-
-def merge(u1, u2):
-    out = u1.copy()
-    for state in u2:
-        if state in out:
-            out[state] += u2[state]
-        else:
-            out[state] = u2[state]
+        for increment, amount in distributions.items():
+            new_position = state[0] + increment
+            new_position %= 10
+            if new_position == 0:
+                new_position = 10
+            new_score = new_position + state[1]
+            if (new_position, new_score) in out:
+                out[(new_position, new_score)] += player[state] * amount
+            else:
+                out[(new_position, new_score)] = player[state] * amount
     return out
 
 
@@ -114,15 +99,10 @@ def play_quantum_game(positions):
     player_two_victory = 0
 
     while not player_one_victory or not player_two_victory:
-        for _ in range(0, 3):
-            player = players[turn % 2]
-            u1 = split_universe(player, 1)
-            u2 = split_universe(player, 2)
-            u3 = split_universe(player, 3)
-            players[turn % 2] = merge(merge(u1, u2), u3)
+        player = players[turn % 2]
+        players[turn % 2] = split_universe(player)
 
-        players[turn % 2] = update_scores(players[turn % 2])
-        players[(turn + 1) % 2] = {k: v * 27 for (k, v) in players[(turn + 1) % 2].items()}
+        # players[(turn + 1) % 2] = {k: v * 27 for (k, v) in players[(turn + 1) % 2].items()}
 
         # Win Condition
         if not player_one_victory:
