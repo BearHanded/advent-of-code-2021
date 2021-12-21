@@ -57,61 +57,6 @@ def play_game(positions=[]):
     return part_one
 
 
-def split_universe(player):
-    out = {}
-    distributions = {3: 1, 4: 3, 5: 6, 6: 7, 7: 6, 8: 3, 9: 1}
-    for state in player:
-        for increment, amount in distributions.items():
-            new_position = state[0] + increment
-            new_position %= 10
-            if new_position == 0:
-                new_position = 10
-            new_score = new_position + state[1]
-            if (new_position, new_score) in out:
-                out[(new_position, new_score)] += player[state] * amount
-            else:
-                out[(new_position, new_score)] = player[state] * amount
-    return out
-
-
-def check_victory(player, name):
-    win = max(player.keys(), key=lambda state: state[1])[1] >= 21
-    total = 0
-    if win:
-        winning_states = {state: v for state, v in player.items() if state[1] >= 21}
-        total = sum(winning_states.values())
-        print(name, 'Universal victory achieved: ', total)
-    return total
-
-
-def play_quantum_game(positions):
-    players = [
-        {
-            (positions[0], 0): 1
-        },
-        {
-            (positions[1], 0): 1
-        }
-    ]
-
-    turn = 0
-    player_one_victory = 0
-    player_two_victory = 0
-
-    while not player_one_victory or not player_two_victory:
-        player = players[turn % 2]
-        players[turn % 2] = split_universe(player)
-
-        # players[(turn + 1) % 2] = {k: v * 27 for (k, v) in players[(turn + 1) % 2].items()}
-
-        # Win Condition
-        if not player_one_victory:
-            player_one_victory = check_victory(players[0], "Player 1")
-        if not player_two_victory:
-            player_two_victory = check_victory(players[1], "Player 2")
-        turn += 1
-
-
 test_dice = Dice()
 assert test_dice.roll_x(3) == 1 + 2 + 3
 assert test_dice.roll_x(3) == 4 + 5 + 6
@@ -124,7 +69,3 @@ assert test_player.score == 2
 assert play_game(positions=[4, 8]) == 739785
 print("PART 1")
 play_game(positions=[4, 5])
-
-print("Part 2")
-assert play_quantum_game(positions=[4, 8]) == 444356092776315
-play_quantum_game(positions=[4, 5])
