@@ -19,7 +19,7 @@ def read_file(file_name):
 def cap_range(a, b):
     if (a < -50 and b < -50) or (a > 50 and b > 50):
         return []
-    out = range(max(min(a, 50), -50), max(min(b, 50), -50))
+    out = range(max(min(a, 50), -50), max(min(b, 50 + 1), -50))
     return out
 
 
@@ -46,3 +46,4 @@ test = read_file('test_2_input.txt')
 assert reboot(test) == 590784
 
 part_one = read_file('input.txt')
+reboot(part_one)
