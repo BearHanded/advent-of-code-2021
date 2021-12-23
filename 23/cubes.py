@@ -11,9 +11,12 @@ TARGETS = {
     'D': 8,
 }
 ROOMS = [2, 4, 6, 8]
-TEST = ['.', '.', 'BA', '.', 'CD', '.', 'BC', '.', 'DA', '.', '.']
-INPUT = ['.', '.', 'AD', '.', 'CA', '.', 'BD', '.', 'CB', '.', '.']
-VICTORY = ['.', '.', 'AA', '.', 'BB', '.', 'CC', '.', 'DD', '.', '.']
+TEST =      ['.', '.', 'BA', '.', 'CD', '.', 'BC', '.', 'DA', '.', '.']
+INPUT =     ['.', '.', 'AD', '.', 'CA', '.', 'BD', '.', 'CB', '.', '.']
+VICTORY =   ['.', '.', 'AA', '.', 'BB', '.', 'CC', '.', 'DD', '.', '.']
+BIG_TEST =  ['.', '.', 'BDDA', '.', 'CCBD', '.', 'BBAC', '.', 'DACA', '.', '.']
+BIG_INPUT = ['.', '.', 'ADDD', '.', 'CCBA', '.', 'BBAD', '.', 'CACB', '.', '.']
+BIG_VICTORY =   ['.', '.', 'AAAA', '.', 'BBBB', '.', 'CCCC', '.', 'DDDD', '.', '.']
 
 
 def room_valid(rooms, piece, endpoint):
@@ -88,8 +91,8 @@ def move(rooms, idx, path):
 
 def add(piece, room):
     room = list(room)
-    offset = room.count('.') - 1
-    room[offset] = piece
+    offset = room.count('.')
+    room[offset - 1] = piece
     return ''.join(room), offset
 
 
@@ -100,8 +103,11 @@ def get_piece(room):
     return None
 
 
-def solve(rooms):
+def solve(rooms, victory_condition=VICTORY):
+    print("\nSOLVING: ", rooms, "\n----------")
     states = {tuple(rooms): 0}
+    journey = {tuple(rooms): []}
+
     queued = [rooms]
     while queued:
         state = queued.pop()
@@ -116,11 +122,17 @@ def solve(rooms):
                 if key not in states or (key in states and cost < states[key]):
                     states[key] = cost
                     queued.append(new_state)
+                    if key not in journey:
+                        journey[key] = []
+                    new_journey = journey[tuple(state)].copy()
+                    new_journey.append(state)
+                    journey[key] = new_journey
 
-    keys = list(states.keys())
-    keys.sort()
-    victory_cost = states[tuple(VICTORY)]
-    print(victory_cost)
+    victory_cost = states[tuple(victory_condition)]
+    solution = journey[tuple(victory_condition)]
+    for i in solution:
+        print(i, states[tuple(i)])
+    print(victory_condition, victory_cost)
     return victory_cost
 
 
@@ -142,9 +154,11 @@ assert move_test_cost == 3
 
 move_test_rooms, move_test_cost = move(['B', '.', 'AA', '.', '..', 'B', 'CC', '.', 'DD', '.', '.'], 0, 4)
 assert move_test_rooms == ['.', '.', 'AA', '.', '.B', 'B', 'CC', '.', 'DD', '.', '.']
-assert move_test_cost == 5 * 10
+assert move_test_cost == 6 * 10
 
 test_idx = 2
 assert TARGETS['A'] == test_idx and test_idx in ROOMS
-assert solve(TEST) == 12521
+assert solve(TEST, VICTORY) == 12521
 solve(INPUT)
+assert solve(BIG_TEST, BIG_VICTORY) == 44169
+solve(BIG_INPUT, BIG_VICTORY)
