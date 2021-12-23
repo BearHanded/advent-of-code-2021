@@ -1,5 +1,3 @@
-from util import christmas_input
-
 ENERGY = {
     'A': 1,
     'B': 10,
@@ -13,7 +11,7 @@ TARGETS = {
     'D': 8,
 }
 ROOMS = [2, 4, 6, 8]
-TEST = ['.', '.', 'BA', '.', 'DC', '.', 'BC', '.', 'DA', '.', '.']
+TEST = ['.', '.', 'BA', '.', 'CD', '.', 'BC', '.', 'DA', '.', '.']
 INPUT = ['.', '.', 'AD', '.', 'CA', '.', 'BD', '.', 'CB', '.', '.']
 VICTORY = ['.', '.', 'AA', '.', 'BB', '.', 'CC', '.', 'DD', '.', '.']
 
@@ -26,7 +24,7 @@ def possible(rooms, idx, endpoint):
     path = [idx, endpoint]
     path.sort()
     for i in range(path[0], path[1] + 1):
-        if i == idx or i in TARGETS:
+        if i == idx or i in ROOMS:
             continue
         if rooms[i] != '.':
             return False
@@ -56,9 +54,10 @@ def explore(rooms, idx):
 
 
 def move(rooms, idx, path):
-    new_state = rooms.copy()
+    new_state = rooms[:]
     d = 0
     piece = get_piece(rooms[idx])
+    # Leave Room
     if len(rooms[idx]) == 1:
         new_state[idx] = '.'
     else:
@@ -77,7 +76,7 @@ def move(rooms, idx, path):
         new_state[idx] = new_room
 
     d += abs(idx - path)
-
+    # Enter space
     if len(rooms[path]) == 1:  # Hallway
         new_state[path] = piece
         return new_state, d * ENERGY[piece]
@@ -113,12 +112,10 @@ def solve(rooms):
             for path in paths:
                 new_state, cost = move(state, idx, path)
                 key = tuple(new_state)
-                cost = states[tuple(state)]
+                cost += states[tuple(state)]
                 if key not in states or (key in states and cost < states[key]):
                     states[key] = cost
                     queued.append(new_state)
-
-        # for all possible moves add if cheaper than existing cost
 
     keys = list(states.keys())
     keys.sort()
@@ -129,5 +126,25 @@ def solve(rooms):
 
 assert get_piece('.') is None
 assert get_piece('..') is None
+assert get_piece('AB') == 'A'
+assert get_piece('.B') == 'B'
+assert room_valid(['.', '.', 'A.', '.', 'BB', '.', 'CC', '.', 'DD', '.', '.'], 'A', 2) is True
+assert room_valid(['.', '.', 'A.', '.', 'BB', '.', 'CC', '.', 'DD', '.', '.'], 'B', 2) is False
+
+# Move tests
+move_test_rooms, move_test_cost = move(['.', '.', '.A', '.', 'BB', '.', 'CC', '.', 'DD', '.', '.'], 2, 3)
+assert move_test_rooms == ['.', '.', '..', 'A', 'BB', '.', 'CC', '.', 'DD', '.', '.']
+assert move_test_cost == 3
+
+move_test_rooms, move_test_cost = move(['.', '.', 'AB', '.', 'BB', '.', 'CC', '.', 'DD', '.', '.'], 2, 0)
+assert move_test_rooms == ['A', '.', '.B', '.', 'BB', '.', 'CC', '.', 'DD', '.', '.']
+assert move_test_cost == 3
+
+move_test_rooms, move_test_cost = move(['B', '.', 'AA', '.', '..', 'B', 'CC', '.', 'DD', '.', '.'], 0, 4)
+assert move_test_rooms == ['.', '.', 'AA', '.', '.B', 'B', 'CC', '.', 'DD', '.', '.']
+assert move_test_cost == 5 * 10
+
+test_idx = 2
+assert TARGETS['A'] == test_idx and test_idx in ROOMS
 assert solve(TEST) == 12521
 solve(INPUT)
