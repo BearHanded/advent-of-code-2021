@@ -1,6 +1,7 @@
 import math
 
 from util import christmas_input
+from util.christmas_input import BColors
 
 
 def op_input(a, input_val, memory):
@@ -36,6 +37,7 @@ OPERATIONS = {
     'mod': op_modulo,
     'eql': op_equal
 }
+DEBUG = False
 
 
 def read_file(file_name):
@@ -62,12 +64,17 @@ def run(instructions, number):
             a = chunks[1]
             b = get_value(chunks[2], memory)
             operation(a, b, memory)
+        if DEBUG:
+            print("{0:20} {1}{2}{3}".format(instruction, BColors.OKBLUE, memory, BColors.ENDC))
     return memory
 
 
 def find_number(instructions):
     number = 99999999999999
-    for i in reversed(range(0, number + 1)):
+    floor = 11111111111111
+    # options = reversed(range(0, number + 1)
+    options = range(11111111111111, number + 1)
+    for i in options:
         num_str = str(i)
         if '0' in num_str:
             continue
@@ -81,4 +88,4 @@ def find_number(instructions):
 
 
 part_one = read_file('input.txt')
-run(part_one)
+find_number(part_one)
